@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "latest",
+    "@material-ui/icons": "^4.2.1",
     "@material-ui/styles": "latest",
     "clsx": "latest",
     "next": "latest",
@@ -16,6 +17,7 @@
     "build": "next build",
     "start": "next start -p $PORT",
     "test": "jest",
+    "test:watch": "jest --watch",
     "coverage": "jest --coverage",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
@@ -30,6 +32,7 @@
     "@types/node": "^12.7.1",
     "cypress": "^3.4.1",
     "jest": "^24.8.0",
+    "prettier": "1.18.2",
     "start-server-and-test": "^1.10.0",
     "typescript": "^3.5.3"
   },
