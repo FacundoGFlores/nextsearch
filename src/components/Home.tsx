@@ -4,17 +4,19 @@ import Box from "@material-ui/core/Box";
 import PageLayout from "./PageLayout";
 import Welcome from "./Welcome";
 import UsersList from "./UsersList";
+import { UserInfo } from "../types/UserInfo";
+import { Users } from "../fixtures/users";
 
 interface Props {
-  query: string;
+  userList: UserInfo[];
   searching: boolean;
 }
 
-const Home: React.SFC<Props> = ({ query, searching }) => {
+const Home: React.SFC<Props> = ({ userList, searching }) => {
   return (
     <PageLayout>
       <Box my={4}>
-        {query && searching ? <UsersList query={query} /> : <Welcome />}
+        <UsersList userList={userList} searching={searching} />
       </Box>
     </PageLayout>
   );

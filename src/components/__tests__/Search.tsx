@@ -31,7 +31,7 @@ describe("Components - Search", () => {
     expect(onEnter).toHaveBeenCalled();
   });
 
-  it.only("should call onEnter when user press Enter key while focusing input", () => {
+  it("should call onEnter when user press Enter key while focusing input", () => {
     const { getByPlaceholderText } = render(<Search {...props} />);
 
     const inputComponent = getByPlaceholderText("Search...");
@@ -46,7 +46,7 @@ describe("Components - Search", () => {
     expect(onEnter).toHaveBeenCalled();
   });
 
-  it.only("should not call onEnter when user press key different than Enter while focusing input", () => {
+  it("should not call onEnter when user press key different than Enter while focusing input", () => {
     const { getByPlaceholderText } = render(<Search {...props} />);
 
     const inputComponent = getByPlaceholderText("Search...");
