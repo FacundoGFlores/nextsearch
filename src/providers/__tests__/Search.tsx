@@ -3,6 +3,22 @@ import { render, fireEvent } from "@testing-library/react";
 import SearchProvider, { SearchConsumer } from "../Search";
 
 describe("Providers - Search", () => {
+  it("consumer shows default userList value", () => {
+    const { getByTestId } = render(
+      <SearchProvider>
+        <SearchConsumer>
+          {({ userList }) => (
+            <div data-testid="list">
+              {userList.length === 0 ? "empty" : "not empty"}
+            </div>
+          )}
+        </SearchConsumer>
+      </SearchProvider>
+    );
+
+    expect(getByTestId("list").textContent).toBe("empty");
+  });
+
   it("consumer shows default query value", () => {
     const { getByTestId } = render(
       <SearchProvider>

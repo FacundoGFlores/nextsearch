@@ -5,8 +5,10 @@ import Home from "../Home";
 const renderHome = () => render(<Home />);
 
 describe("Containers - Home", () => {
-  it("should show welcome as default", () => {
+  it("should show users not found as default", () => {
     const { getByTestId } = renderHome();
-    expect(getByTestId("home-title").textContent).toBe("Github User Search");
+    expect(getByTestId("userslist-notfound").textContent).toBe(
+      "No users found."
+    );
   });
 });
