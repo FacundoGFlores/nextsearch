@@ -1,18 +1,37 @@
 import { render, cleanup } from "@testing-library/react";
 import Home from "../Home";
+import SearchProvider from "../../providers/Search";
 
 afterEach(cleanup);
 
-describe("Components - Home", () => {
-  it("should render secondary button with text SECONDARY", () => {
-    const { getByTestId } = render(<Home />);
+const renderHome = props =>
+  render(
+    <SearchProvider>
+      <Home {...props} />
+    </SearchProvider>
+  );
 
-    expect(getByTestId("secondary-button").textContent).toBe("SECONDARY");
+describe("Components - Home", () => {
+  it("should render UserList when there is query and it is searching", () => {
+    const props = {
+      query: "foo",
+      searching: true
+    };
+    const { getByTestId } = renderHome(props);
+
+    expect(getByTestId("users-list").textContent).toBe("Searching for: foo");
   });
 
-  it("should render primary button with text PRIMARY", () => {
-    const { getByTestId } = render(<Home />);
+  it("should render Welcome when searching is false ", () => {
+    const props = {
+      query: "",
+      searching: false
+    };
 
-    expect(getByTestId("primary-button").textContent).toBe("PRIMARY");
+    const { getByTestId } = renderHome(props);
+
+    expect(getByTestId("home-title").textContent).toContain(
+      "Github User Search"
+    );
   });
 });
