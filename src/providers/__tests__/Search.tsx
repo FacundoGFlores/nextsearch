@@ -1,11 +1,13 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
-import SearchProvider, { SearchConsumer } from "../Search";
+import { SearchConsumer } from "../Search";
+import SearchUserProvider, { mockError } from "../../utils/SearchUsersProvider";
+import { wait } from "@apollo/react-testing";
 
 describe("Providers - Search", () => {
   it("consumer shows default userList value", () => {
     const { getByTestId } = render(
-      <SearchProvider>
+      <SearchUserProvider>
         <SearchConsumer>
           {({ userList }) => (
             <div data-testid="list">
@@ -13,7 +15,7 @@ describe("Providers - Search", () => {
             </div>
           )}
         </SearchConsumer>
-      </SearchProvider>
+      </SearchUserProvider>
     );
 
     expect(getByTestId("list").textContent).toBe("empty");
@@ -21,11 +23,11 @@ describe("Providers - Search", () => {
 
   it("consumer shows default query value", () => {
     const { getByTestId } = render(
-      <SearchProvider>
+      <SearchUserProvider>
         <SearchConsumer>
           {({ query }) => <div data-testid="query">{`query: ${query}`}</div>}
         </SearchConsumer>
-      </SearchProvider>
+      </SearchUserProvider>
     );
 
     expect(getByTestId("query").textContent).toBe("query: ");
@@ -33,13 +35,13 @@ describe("Providers - Search", () => {
 
   it("consumer shows default searching value", () => {
     const { getByTestId } = render(
-      <SearchProvider>
+      <SearchUserProvider>
         <SearchConsumer>
           {({ searching }) => (
             <div data-testid="searching">{!searching && "false"}</div>
           )}
         </SearchConsumer>
-      </SearchProvider>
+      </SearchUserProvider>
     );
 
     expect(getByTestId("searching").textContent).toBe("false");
@@ -47,7 +49,7 @@ describe("Providers - Search", () => {
 
   it("consumer can change query through setQuery", () => {
     const { getByTestId } = render(
-      <SearchProvider>
+      <SearchUserProvider>
         <SearchConsumer>
           {({ query, setQuery }) => (
             <React.Fragment>
@@ -56,7 +58,7 @@ describe("Providers - Search", () => {
             </React.Fragment>
           )}
         </SearchConsumer>
-      </SearchProvider>
+      </SearchUserProvider>
     );
     expect(getByTestId("query").textContent).toBe("");
     const button = getByTestId("button");
@@ -64,22 +66,56 @@ describe("Providers - Search", () => {
     expect(getByTestId("query").textContent).toBe("foo");
   });
 
-  it("consumer can change searching state through setSearching", () => {
+  it("consumer perform a search when a query was set", () => {
     const { getByTestId } = render(
-      <SearchProvider>
+      <SearchUserProvider>
         <SearchConsumer>
-          {({ searching, setSearching }) => (
+          {({ searching, setQuery, search }) => (
             <React.Fragment>
               <div data-testid="searching">{searching ? "true" : "false"}</div>
-              <button onClick={() => setSearching(true)} data-testid="button" />
+              <button
+                onClick={() => setQuery("foo")}
+                data-testid="button-query"
+              />
+              <button onClick={search} data-testid="button-search" />
             </React.Fragment>
           )}
         </SearchConsumer>
-      </SearchProvider>
+      </SearchUserProvider>
     );
     expect(getByTestId("searching").textContent).toBe("false");
-    const button = getByTestId("button");
-    fireEvent.click(button);
+    const buttonQuery = getByTestId("button-query");
+    fireEvent.click(buttonQuery);
+    const buttonSearch = getByTestId("button-search");
+    fireEvent.click(buttonSearch);
     expect(getByTestId("searching").textContent).toBe("true");
+  });
+
+  it("consumer performs an error for graphql", async () => {
+    const { getByTestId } = render(
+      <SearchUserProvider mocks={mockError}>
+        <SearchConsumer>
+          {({ setQuery, search, error }) => (
+            <React.Fragment>
+              <div data-testid="error">{error ? "true" : "false"}</div>
+              <button
+                onClick={() => setQuery("foo")}
+                data-testid="button-query"
+              />
+              <button onClick={search} data-testid="button-search" />
+            </React.Fragment>
+          )}
+        </SearchConsumer>
+      </SearchUserProvider>
+    );
+    expect(getByTestId("error").textContent).toBe("false");
+    const buttonQuery = getByTestId("button-query");
+    fireEvent.click(buttonQuery);
+    const buttonSearch = getByTestId("button-search");
+    try {
+      await fireEvent.click(buttonSearch);
+    } catch (e) {
+      expect(getByTestId("searching").textContent).toBe("true");
+    }
   });
 });

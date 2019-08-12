@@ -5,8 +5,8 @@ import Search from "../components/Search";
 const SearchContainer: React.SFC = () => {
   return (
     <SearchConsumer>
-      {({ setQuery, setSearching }) => (
-        <Search onChange={setQuery} onEnter={() => setSearching(true)} />
+      {({ setQuery, search }) => (
+        <Search onChange={setQuery} onEnter={search} />
       )}
     </SearchConsumer>
   );
