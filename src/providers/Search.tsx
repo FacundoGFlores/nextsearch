@@ -9,6 +9,7 @@ interface Context {
   query: string;
   searching: boolean;
   userList: UserInfo[];
+  total: number;
   setQuery: (q: string) => void;
   search: () => void;
   error: boolean;
@@ -34,14 +35,15 @@ const SearchProvider = ({ children }) => {
     query: "",
     userList: [],
     searching: false,
-    error: false
+    error: false,
+    total: 0
   });
 
   const client = useApolloClient();
 
   const performSearch = async () => {
     if (state.query) {
-      setState({ ...state, searching: true, error: false });
+      setState({ ...state, total: 0, searching: true, error: false });
       try {
         const { data } = await client.query({
           query: UsersSearch,
@@ -53,12 +55,14 @@ const SearchProvider = ({ children }) => {
         });
         setState({
           ...state,
+          total: data.search.userCount,
           userList: dataTransformer(data.search.edges),
           searching: false
         });
       } catch (e) {
         setState({
           ...state,
+          total: 0,
           error: true
         });
       }
@@ -72,6 +76,7 @@ const SearchProvider = ({ children }) => {
         searching: state.searching,
         userList: state.userList,
         error: state.error,
+        total: state.total,
         setQuery: (query: string) =>
           setState({ ...state, query, searching: false }),
         search: performSearch
