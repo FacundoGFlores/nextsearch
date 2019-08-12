@@ -1,15 +1,15 @@
 import { render, cleanup } from "@testing-library/react";
 import Home from "../Home";
-import SearchProvider from "../../providers/Search";
 import { Users } from "../../fixtures/users";
+import SearchUserProvider from "../../utils/SearchUsersProvider";
 
 afterEach(cleanup);
 
 const renderHome = props =>
   render(
-    <SearchProvider>
+    <SearchUserProvider>
       <Home {...props} />
-    </SearchProvider>
+    </SearchUserProvider>
   );
 
 describe("Components - Home", () => {

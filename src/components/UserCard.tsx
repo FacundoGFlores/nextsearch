@@ -22,8 +22,18 @@ const useStyles = makeStyles((theme: Theme) =>
       flex: "1 0 auto"
     },
     cover: {
-      width: 151,
-      height: 151
+      width: "151px",
+      height: "151px",
+      minWidth: "151px",
+      maxHeight: "100%"
+    },
+    bio: {
+      maxWidth: "35%"
+    },
+    textOverflow: {
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis"
     }
   })
 );
@@ -54,13 +64,16 @@ const UserCard: React.SFC<UserInfo> = ({
                 {name ? name : "No name"}
               </Typography>
             </Link>
-            <Typography
-              variant="subtitle1"
-              color="textSecondary"
-              data-testid="user-bio"
-            >
-              {bio}
-            </Typography>
+            <div className={classes.bio}>
+              <Typography
+                variant="subtitle1"
+                color="textSecondary"
+                data-testid="user-bio"
+                className={classes.textOverflow}
+              >
+                {bio}
+              </Typography>
+            </div>
             <Grid container>
               <Box my={1}>
                 <Grid item>

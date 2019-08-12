@@ -1,13 +1,13 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import PageLayout from "../PageLayout";
-import SearchProvider from "../../providers/Search";
+import SearchUserProvider from "../../utils/SearchUsersProvider";
 
 const renderPageLayout = () =>
   render(
-    <SearchProvider>
+    <SearchUserProvider>
       <PageLayout>{"foo"}</PageLayout>
-    </SearchProvider>
+    </SearchUserProvider>
   );
 
 describe("Components - PageLayout", () => {
