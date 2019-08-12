@@ -6,8 +6,8 @@ const HomeContainer: React.SFC = () => {
   return (
     <SearchProvider>
       <SearchConsumer>
-        {({ userList, searching }) => (
-          <Home userList={userList} searching={searching} />
+        {({ userList, searching, total }) => (
+          <Home userList={userList} searching={searching} totalCount={total} />
         )}
       </SearchConsumer>
     </SearchProvider>
