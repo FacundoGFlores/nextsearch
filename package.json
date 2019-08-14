@@ -42,7 +42,6 @@
     "typescript": "^3.5.3"
   },
   "jest": {
-    "collectCoverage": true,
     "collectCoverageFrom": [
       "**/*.{js,ts,tsx}",
       "!**/next.config.js",
