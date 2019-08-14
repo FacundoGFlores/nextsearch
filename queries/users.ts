@@ -1,8 +1,8 @@
 import { gql } from "apollo-boost";
 
-const UsersSearch = gql(`
-query UsersSearch($query: String!, $before: String, $after: String) { 
-	search(query: $query, first: 5, before: $before, after: $after, type: USER) {
+const UsersQuery = gql(`
+query UsersSearch($query: String!, $after: String) { 
+	search(query: $query, first: 5, after: $after, type: USER) {
     userCount
     edges {
       node {
@@ -30,4 +30,4 @@ query UsersSearch($query: String!, $before: String, $after: String) {
 }
 `);
 
-export default UsersSearch;
+export default UsersQuery;

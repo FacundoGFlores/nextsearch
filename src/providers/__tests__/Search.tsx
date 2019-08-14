@@ -1,7 +1,10 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
+import { act } from "react-dom/test-utils";
+
 import { SearchConsumer } from "../Search";
-import SearchUserProvider, { mockError } from "../../utils/SearchUsersProvider";
+import SearchUserProvider from "../../utils/SearchUsersProvider";
+import { UsersError } from "../../utils/__fixtures__/usersResponse";
 import { wait } from "@apollo/react-testing";
 
 describe("Providers - Search", () => {
@@ -66,18 +69,23 @@ describe("Providers - Search", () => {
     expect(getByTestId("query").textContent).toBe("foo");
   });
 
-  it("consumer perform a search when a query was set", () => {
-    const { getByTestId } = render(
+  it("consumer perform a search when a query was set", async () => {
+    const { getByTestId, getAllByTestId } = render(
       <SearchUserProvider>
         <SearchConsumer>
-          {({ searching, setQuery, search }) => (
+          {({ searching, setQuery, search, userList }) => (
             <React.Fragment>
               <div data-testid="searching">{searching ? "true" : "false"}</div>
               <button
-                onClick={() => setQuery("foo")}
+                onClick={() => setQuery("facundo")}
                 data-testid="button-query"
               />
               <button onClick={search} data-testid="button-search" />
+              {userList.map((u, i) => (
+                <div data-testid="user" key={i}>
+                  {u.name}
+                </div>
+              ))}
             </React.Fragment>
           )}
         </SearchConsumer>
@@ -89,33 +97,266 @@ describe("Providers - Search", () => {
     const buttonSearch = getByTestId("button-search");
     fireEvent.click(buttonSearch);
     expect(getByTestId("searching").textContent).toBe("true");
+    await wait(1);
+
+    process.nextTick(() => {
+      expect(getAllByTestId("user")).toMatchInlineSnapshot(`
+                                        Array [
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Olano
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Batista
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Farias
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Domínguez
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Cabrera
+                                          </div>,
+                                        ]
+                              `);
+    });
   });
 
-  it("consumer performs an error for graphql", async () => {
-    const { getByTestId } = render(
-      <SearchUserProvider mocks={mockError}>
+  it("user should be able to navigate forward", async () => {
+    const { getByTestId, getAllByTestId } = render(
+      <SearchUserProvider>
         <SearchConsumer>
-          {({ setQuery, search, error }) => (
+          {({ onForward, setQuery, search, userList }) => (
             <React.Fragment>
-              <div data-testid="error">{error ? "true" : "false"}</div>
               <button
-                onClick={() => setQuery("foo")}
+                onClick={() => setQuery("facundo")}
                 data-testid="button-query"
               />
               <button onClick={search} data-testid="button-search" />
+              <button onClick={onForward} data-testid="button-forward" />
+              {userList.map((u, i) => (
+                <div data-testid="user" key={i}>
+                  {u.name}
+                </div>
+              ))}
             </React.Fragment>
           )}
         </SearchConsumer>
       </SearchUserProvider>
     );
-    expect(getByTestId("error").textContent).toBe("false");
     const buttonQuery = getByTestId("button-query");
     fireEvent.click(buttonQuery);
     const buttonSearch = getByTestId("button-search");
-    try {
-      await fireEvent.click(buttonSearch);
-    } catch (e) {
-      expect(getByTestId("searching").textContent).toBe("true");
-    }
+    fireEvent.click(buttonSearch);
+    await wait(1);
+
+    process.nextTick(() => {
+      expect(getAllByTestId("user")).toMatchInlineSnapshot(`
+                                        Array [
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Olano
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Batista
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Farias
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Domínguez
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Cabrera
+                                          </div>,
+                                        ]
+                              `);
+    });
+    const buttonNext = getByTestId("button-forward");
+    fireEvent.click(buttonNext);
+    await wait(1);
+    process.nextTick(() => {
+      expect(getAllByTestId("user")).toMatchInlineSnapshot(`
+                                Array [
+                                  <div
+                                    data-testid="user"
+                                  />,
+                                  <div
+                                    data-testid="user"
+                                  >
+                                    Facundo Victor
+                                  </div>,
+                                  <div
+                                    data-testid="user"
+                                  >
+                                    Facundo Quiroga
+                                  </div>,
+                                  <div
+                                    data-testid="user"
+                                  >
+                                    Facundo
+                                  </div>,
+                                  <div
+                                    data-testid="user"
+                                  >
+                                    Facundo Viale
+                                  </div>,
+                                ]
+                        `);
+    });
+  });
+
+  it("user should be able to navigate backwards", async () => {
+    const { getByTestId, getAllByTestId } = render(
+      <SearchUserProvider>
+        <SearchConsumer>
+          {({ onBack, onForward, setQuery, search, userList }) => (
+            <React.Fragment>
+              <button
+                onClick={() => setQuery("facundo")}
+                data-testid="button-query"
+              />
+              <button onClick={search} data-testid="button-search" />
+              <button onClick={onForward} data-testid="button-forward" />
+              <button onClick={onBack} data-testid="button-backward" />
+              {userList.map((u, i) => (
+                <div data-testid="user" key={i}>
+                  {u.name}
+                </div>
+              ))}
+            </React.Fragment>
+          )}
+        </SearchConsumer>
+      </SearchUserProvider>
+    );
+    const buttonQuery = getByTestId("button-query");
+    fireEvent.click(buttonQuery);
+    const buttonSearch = getByTestId("button-search");
+    fireEvent.click(buttonSearch);
+    await wait(10);
+
+    process.nextTick(() => {
+      expect(getAllByTestId("user")).toMatchInlineSnapshot(`
+                                        Array [
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Olano
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Batista
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Farias
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Domínguez
+                                          </div>,
+                                          <div
+                                            data-testid="user"
+                                          >
+                                            Facundo Cabrera
+                                          </div>,
+                                        ]
+                              `);
+    });
+
+    const buttonNext = getByTestId("button-forward");
+    fireEvent.click(buttonNext);
+    await wait(0);
+
+    fireEvent.click(buttonNext);
+    await wait(0);
+    process.nextTick(() => {
+      expect(getAllByTestId("user")).toMatchInlineSnapshot(`
+        Array [
+          <div
+            data-testid="user"
+          >
+            Facundo Mainere
+          </div>,
+          <div
+            data-testid="user"
+          >
+            Facundo Flores
+          </div>,
+          <div
+            data-testid="user"
+          >
+            Facundo Montero
+          </div>,
+          <div
+            data-testid="user"
+          >
+            Facundo Muñoz
+          </div>,
+          <div
+            data-testid="user"
+          >
+            Facundo Chamut
+          </div>,
+        ]
+      `);
+    });
+
+    await wait(1);
+
+    const buttonBack = getByTestId("button-backward");
+    fireEvent.click(buttonBack);
+    await wait(1);
+    process.nextTick(() => {
+      expect(getAllByTestId("user")).toMatchInlineSnapshot(`
+                Array [
+                  <div
+                    data-testid="user"
+                  />,
+                  <div
+                    data-testid="user"
+                  >
+                    Facundo Victor
+                  </div>,
+                  <div
+                    data-testid="user"
+                  >
+                    Facundo Quiroga
+                  </div>,
+                  <div
+                    data-testid="user"
+                  >
+                    Facundo
+                  </div>,
+                  <div
+                    data-testid="user"
+                  >
+                    Facundo Viale
+                  </div>,
+                ]
+            `);
+    });
   });
 });
