@@ -193,7 +193,7 @@ describe("Providers - Search", () => {
     });
     const buttonNext = getByTestId("button-forward");
     fireEvent.click(buttonNext);
-    await wait(1);
+    await wait(0);
     process.nextTick(() => {
       expect(getAllByTestId("user")).toMatchInlineSnapshot(`
                                 Array [
