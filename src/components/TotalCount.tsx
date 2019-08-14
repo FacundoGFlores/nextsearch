@@ -6,7 +6,7 @@ interface Props {
 }
 
 const TotalCount: React.SFC<Props> = ({ count }) => (
-  <Typography variant="subtitle2" data-testid="total-count">
+  <Typography variant="subtitle1" data-testid="total-count">
     {`Users found: ${count}`}
   </Typography>
 );

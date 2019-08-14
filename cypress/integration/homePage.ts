@@ -16,4 +16,17 @@ describe("Home Page", () => {
     cy.wait(500);
     cy.queryByText("Loading...").should("not.exist");
   });
+  it.only("Check user can navigate", () => {
+    cy.visit("/");
+    cy.queryByPlaceholderText("Search...").focus();
+    cy.queryByPlaceholderText("Search...").type("foo");
+    cy.queryByPlaceholderText("Search...").blur();
+    cy.wait(500);
+    cy.queryByText("Zhouxuan Yang").should("exist");
+    cy.queryByTestId("arrow-right").click();
+    cy.queryByText("Fooying").should("exist");
+    cy.queryByText("Zhouxuan Yang").should("not.exist");
+    cy.queryByTestId("arrow-left").click();
+    cy.queryByText("Zhouxuan Yang").should("exist");
+  });
 });

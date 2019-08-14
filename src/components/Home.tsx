@@ -3,24 +3,27 @@ import React from "react";
 import Box from "@material-ui/core/Box";
 import PageLayout from "./PageLayout";
 import UsersList from "./UsersList";
+import UserNavigation from "./UserNavigation";
 import { UserInfo } from "../types/UserInfo";
-import TotalCount from "./TotalCount";
-import { Grid } from "@material-ui/core";
 
 interface Props {
   userList: UserInfo[];
   searching: boolean;
   totalCount: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+  onClickLeft: () => void;
+  onClickRight: () => void;
 }
 
-const Home: React.SFC<Props> = ({ userList, searching, totalCount }) => {
+const Home: React.SFC<Props> = ({ userList, searching, ...userNavProps }) => {
   return (
     <PageLayout>
-      <Box my={2}>
-        <Grid container direction="row" justify="center">
-          {userList.length ? <TotalCount count={totalCount} /> : null}
-        </Grid>
-      </Box>
+      {userList.length ? (
+        <Box my={2}>
+          <UserNavigation searching={searching} {...userNavProps} />
+        </Box>
+      ) : null}
       <Box my={2}>
         <UsersList userList={userList} searching={searching} />
       </Box>

@@ -2,8 +2,14 @@ import React, { createContext, useState } from "react";
 import { useApolloClient } from "@apollo/react-hooks";
 
 import { UserInfo } from "../types/UserInfo";
-import UsersSearch from "../../queries/users";
-import { NetworkStatus } from "apollo-boost";
+import UsersQuery from "../../queries/users";
+
+interface PageInfo {
+  startCursor: string | null;
+  endCursor: string | null;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
 
 interface Context {
   query: string;
@@ -13,6 +19,9 @@ interface Context {
   setQuery: (q: string) => void;
   search: () => void;
   error: boolean;
+  onBack: () => void;
+  onForward: () => void;
+  pageInfo: PageInfo | null;
 }
 const SearchContext = createContext<Context>(null);
 
@@ -30,42 +39,111 @@ const dataTransformer = (edges: any[]): UserInfo[] => {
     })
   );
 };
+
 const SearchProvider = ({ children }) => {
   const [state, setState] = useState({
     query: "",
     userList: [],
     searching: false,
     error: false,
-    total: 0
+    total: 0,
+    pageInfo: {
+      startCursor: null,
+      endCursor: null,
+      hasPreviousPage: false,
+      hasNextPage: false
+    },
+    cursorStack: []
   });
 
   const client = useApolloClient();
 
   const performSearch = async () => {
     if (state.query) {
-      setState({ ...state, total: 0, searching: true, error: false });
-      try {
-        const { data } = await client.query({
-          query: UsersSearch,
-          variables: {
-            query: state.query,
-            after: null,
-            before: null
-          }
-        });
-        setState({
-          ...state,
-          total: data.search.userCount,
-          userList: dataTransformer(data.search.edges),
-          searching: false
-        });
-      } catch (e) {
-        setState({
-          ...state,
-          total: 0,
-          error: true
-        });
-      }
+      setState({
+        ...state,
+        pageInfo: null,
+        total: 0,
+        searching: true,
+        error: false
+      });
+      const { data } = await client.query({
+        query: UsersQuery,
+        variables: {
+          query: state.query,
+          after: null
+        }
+      });
+      setState({
+        ...state,
+        pageInfo: data.search.pageInfo,
+        total: data.search.userCount,
+        userList: dataTransformer(data.search.edges),
+        searching: false
+      });
+    }
+  };
+
+  const handleBack = async () => {
+    if (state.pageInfo.hasPreviousPage) {
+      let existingStack = state.cursorStack;
+      existingStack.pop();
+
+      setState({
+        ...state,
+        pageInfo: null,
+        total: 0,
+        searching: true,
+        error: false,
+        cursorStack: existingStack
+      });
+
+      const lastCursor =
+        existingStack.length > 0
+          ? existingStack[existingStack.length - 1]
+          : null;
+
+      const { data } = await client.query({
+        query: UsersQuery,
+        variables: {
+          query: state.query,
+          after: lastCursor
+        }
+      });
+      setState({
+        ...state,
+        pageInfo: data.search.pageInfo,
+        userList: dataTransformer(data.search.edges),
+        searching: false
+      });
+    }
+  };
+
+  const handleForward = async () => {
+    if (state.pageInfo.hasNextPage) {
+      let existingStack = state.cursorStack;
+      existingStack.push(state.pageInfo.endCursor);
+      setState({
+        ...state,
+        pageInfo: null,
+        total: 0,
+        searching: true,
+        error: false,
+        cursorStack: existingStack
+      });
+      const { data } = await client.query({
+        query: UsersQuery,
+        variables: {
+          query: state.query,
+          after: state.pageInfo.endCursor
+        }
+      });
+      setState({
+        ...state,
+        pageInfo: data.search.pageInfo,
+        userList: dataTransformer(data.search.edges),
+        searching: false
+      });
     }
   };
 
@@ -77,6 +155,9 @@ const SearchProvider = ({ children }) => {
         userList: state.userList,
         error: state.error,
         total: state.total,
+        pageInfo: state.pageInfo,
+        onBack: handleBack,
+        onForward: handleForward,
         setQuery: (query: string) =>
           setState({ ...state, query, searching: false }),
         search: performSearch
