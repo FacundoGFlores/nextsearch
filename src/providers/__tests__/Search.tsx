@@ -288,10 +288,10 @@ describe("Providers - Search", () => {
 
     const buttonNext = getByTestId("button-forward");
     fireEvent.click(buttonNext);
-    await wait(0);
+    await wait(10);
 
     fireEvent.click(buttonNext);
-    await wait(0);
+    await wait(10);
     process.nextTick(() => {
       expect(getAllByTestId("user")).toMatchInlineSnapshot(`
         Array [
